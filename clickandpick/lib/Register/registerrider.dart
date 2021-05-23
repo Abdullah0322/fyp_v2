@@ -27,33 +27,9 @@ class _RegisterRiderState extends State<RegisterRider> {
   final register = TextEditingController();
   var signUp;
   void initState() {
-    checkphone();
     super.initState();
     _myActivity = '';
     _myActivityResult = '';
-  }
-
-  List<String> phonenumbers = [];
-  checkphone() async {
-    await FirebaseFirestore.instance
-        .collection('rider')
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        // distances.add(distance(
-        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
-        //   LatLng(doc['location'].latitude, doc['location'].longitude),
-        // ).toInt());
-
-        setState(() {
-          phonenumbers.add(doc['phone']);
-          // small = distances
-          //     .reduce((value, element) => value < element ? value : element);
-          // collect = doc['collection point'];
-        });
-        // collection.add(doc["location"]);
-      });
-    });
   }
 
   final requiredValidator =
@@ -87,7 +63,7 @@ class _RegisterRiderState extends State<RegisterRider> {
             'vehiclename': vehicle.text,
             'Vehicle Registration Number': register.text,
             'available': false,
-            'collection point': _myActivity,
+            // 'collection point': _myActivity,
           });
           FirebaseFirestore.instance
               .collection("rider")
@@ -157,7 +133,6 @@ class _RegisterRiderState extends State<RegisterRider> {
 
   @override
   Widget build(BuildContext context) {
-    print(phonenumbers);
     var height = MediaQuery.of(context).size.height;
     //width of the screen
     var width = MediaQuery.of(context).size.width;
@@ -398,45 +373,45 @@ class _RegisterRiderState extends State<RegisterRider> {
                         ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      child: DropDownFormField(
-                        validator: requiredValidator,
-                        titleText: 'Collection Point',
-                        hintText: 'Please choose one',
-                        value: _myActivity,
-                        onSaved: (value) {
-                          setState(() {
-                            _myActivity = value;
-                          });
-                        },
-                        onChanged: (value) {
-                          setState(() {
-                            _myActivity = value;
-                          });
-                        },
-                        dataSource: [
-                          {
-                            "display": "Bahria",
-                            "value": "Bahria",
-                          },
-                          {
-                            "display": "Valencia",
-                            "value": "Valencia",
-                          },
-                          {
-                            "display": "Cantt",
-                            "value": "Cantt",
-                          },
-                          {
-                            "display": "DHA",
-                            "value": "DHA",
-                          },
-                        ],
-                        textField: 'display',
-                        valueField: 'value',
-                      ),
-                    ),
+                    // Container(
+                    //   padding: EdgeInsets.all(16),
+                    //   child: DropDownFormField(
+                    //     validator: requiredValidator,
+                    //     titleText: 'Collection Point',
+                    //     hintText: 'Please choose one',
+                    //     value: _myActivity,
+                    //     onSaved: (value) {
+                    //       setState(() {
+                    //         _myActivity = value;
+                    //       });
+                    //     },
+                    //     onChanged: (value) {
+                    //       setState(() {
+                    //         _myActivity = value;
+                    //       });
+                    //     },
+                    //     dataSource: [
+                    //       {
+                    //         "display": "Bahria",
+                    //         "value": "Bahria",
+                    //       },
+                    //       {
+                    //         "display": "Valencia",
+                    //         "value": "Valencia",
+                    //       },
+                    //       {
+                    //         "display": "Cantt",
+                    //         "value": "Cantt",
+                    //       },
+                    //       {
+                    //         "display": "DHA",
+                    //         "value": "DHA",
+                    //       },
+                    //     ],
+                    //     textField: 'display',
+                    //     valueField: 'value',
+                    //   ),
+                    // ),
                     SizedBox(
                       height: 20,
                     ),
@@ -445,9 +420,24 @@ class _RegisterRiderState extends State<RegisterRider> {
                       child: GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState.validate()) {
-                            if (phonenumbers.contains(phone.text)) {
+                            try {
+                              final result =
+                                  await InternetAddress.lookup('google.com');
+                              if (result.isNotEmpty &&
+                                  result[0].rawAddress.isNotEmpty) {
+                                print('connected');
+                                setState(() {
+                                  signUp = false;
+                                });
+                                signup();
+                              }
+                            } on SocketException catch (_) {
+                              print('not connected');
+                              setState(() {
+                                signUp = false;
+                              });
                               Fluttertoast.showToast(
-                                msg: "Phone number has been taken",
+                                msg: "You're not connected to the internet",
                                 toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.BOTTOM,
                                 timeInSecForIosWeb: 3,
@@ -455,33 +445,6 @@ class _RegisterRiderState extends State<RegisterRider> {
                                 textColor: Colors.white,
                                 fontSize: 15,
                               );
-                            } else {
-                              try {
-                                final result =
-                                    await InternetAddress.lookup('google.com');
-                                if (result.isNotEmpty &&
-                                    result[0].rawAddress.isNotEmpty) {
-                                  print('connected');
-                                  setState(() {
-                                    signUp = false;
-                                  });
-                                  signup();
-                                }
-                              } on SocketException catch (_) {
-                                print('not connected');
-                                setState(() {
-                                  signUp = false;
-                                });
-                                Fluttertoast.showToast(
-                                  msg: "You're not connected to the internet",
-                                  toastLength: Toast.LENGTH_LONG,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 3,
-                                  backgroundColor: Colors.red[400],
-                                  textColor: Colors.white,
-                                  fontSize: 15,
-                                );
-                              }
                             }
                           }
                         },

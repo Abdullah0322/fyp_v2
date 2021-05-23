@@ -21,55 +21,61 @@ class _ManageOrdersState extends State<ManageOrders> {
   QuerySnapshot riderSnap;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  var currentCollectionPoint;
-  var snap1;
-  getOrders() async {
-    User user = FirebaseAuth.instance.currentUser;
-    var snap2 = await FirebaseFirestore.instance
-        .collection("manager")
-        .doc(user.email)
-        .get()
-        .then((value) {
-      setState(() {
-        currentCollectionPoint = value.data()['collection point'];
-        snap1 = FirebaseFirestore.instance
-            .collection('orders')
-            .where('Order Recieved to Collection Point', isEqualTo: false)
-            .where('collection point', isEqualTo: currentCollectionPoint)
-            .snapshots();
-      });
-    });
+  //var currentCollectionPoint;
+  //var snap1;
+  // getOrders() async {
+  //   User user = FirebaseAuth.instance.currentUser;
+  //   var snap2 = await FirebaseFirestore.instance
+  //       .collection("manager")
+  //       .doc(user.email)
+  //       .get()
+  //       .then((value) {
+  //     setState(() {
+  //       //currentCollectionPoint = value.data()['collection point'];
+  //       snap1 = FirebaseFirestore.instance
+  //           .collection('orders')
+  //           .where('Order Recieved to Collection Point', isEqualTo: false)
+  //           //  .where('collection point', isEqualTo: currentCollectionPoint)
+  //           .snapshots();
+  //     });
+  //   });
 
-    _refreshController.refreshCompleted();
-    _refreshController.loadComplete();
-    return snap1;
+  //   _refreshController.refreshCompleted();
+  //   _refreshController.loadComplete();
+  //   return snap1;
+  // }
+  int ordersQuantity;
+  getSellerCoordinates() {
+    User user = FirebaseAuth.instance.currentUser;
+    try {} catch (e) {
+      print(e);
+    }
   }
 
-  // getOrders() {
-  //   User user = FirebaseAuth.instance.currentUser;
+  getOrders() {
+    User user = FirebaseAuth.instance.currentUser;
 
-  //   try {
-  //     return FirebaseFirestore.instance
-  //         .collection('orders')
-  //         .where('Order Recieved to Collection Point', isEqualTo: false)
-  //         .where(field)
-  //         .snapshots();
+    try {
+      return FirebaseFirestore.instance
+          .collection('orders')
+          .where('Order Recieved to Collection Point', isEqualTo: false)
+          .snapshots();
 
-  //     _refreshController.refreshCompleted();
-  //     _refreshController.loadComplete();
-  //   } catch (e) {
-  //     print(e);
-  //     Fluttertoast.showToast(
-  //       msg: e,
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.BOTTOM,
-  //       timeInSecForIosWeb: 3,
-  //       backgroundColor: Colors.red[400],
-  //       textColor: Colors.white,
-  //       fontSize: 15,
-  //     );
-  //   }
-  // }
+      _refreshController.refreshCompleted();
+      _refreshController.loadComplete();
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+        msg: e,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red[400],
+        textColor: Colors.white,
+        fontSize: 15,
+      );
+    }
+  }
 
   void initState() {
     super.initState();
@@ -82,7 +88,7 @@ class _ManageOrdersState extends State<ManageOrders> {
     var screenWidth = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-
+    print(ordersQuantity);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFBB03B2),
@@ -90,7 +96,7 @@ class _ManageOrdersState extends State<ManageOrders> {
       ),
       drawer: ManagerDrawer(),
       body: StreamBuilder(
-        stream: snap1,
+        stream: getOrders(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           return snapshot.hasData && snapshot.data.docs.isNotEmpty
               ? ListView.builder(

@@ -23,32 +23,32 @@ class _ManageRidersState extends State<ManageRiders>
   int riderCount;
   var snap1;
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  QuerySnapshot riderSnap;
 
-  var riderSnap;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  //This function returns the rider to their collection point
+  getRider() {
+    try {
+      return FirebaseFirestore.instance
+          .collection('rider')
+          .where('available', isEqualTo: true)
+          .snapshots();
 
-  var currentCollectionPoint;
-  getRider() async {
-    User user = FirebaseAuth.instance.currentUser;
-    var snap2 = await FirebaseFirestore.instance
-        .collection("manager")
-        .doc(user.email)
-        .get()
-        .then((value) {
-      setState(() {
-        currentCollectionPoint = value.data()['collection point'];
-        snap1 = FirebaseFirestore.instance
-            .collection('rider')
-            .where('available', isEqualTo: true)
-            .where('collection point', isEqualTo: currentCollectionPoint)
-            .snapshots();
-      });
-    });
-
-    _refreshController.refreshCompleted();
-    _refreshController.loadComplete();
-    return snap1;
+      _refreshController.refreshCompleted();
+      _refreshController.loadComplete();
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(
+        msg: e,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.red[400],
+        textColor: Colors.white,
+        fontSize: 15,
+      );
+    }
   }
 
   void initState() {
@@ -85,8 +85,8 @@ class _ManageRidersState extends State<ManageRiders>
       ),
       drawer: ManagerDrawer(),
       body: StreamBuilder(
-        stream: snap1,
-        builder: (context, snapshot) {
+        stream: getRider(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           return snapshot.hasData && snapshot.data.docs.isNotEmpty
               ? ListView.builder(
                   itemCount: snapshot.data.docs.length,
