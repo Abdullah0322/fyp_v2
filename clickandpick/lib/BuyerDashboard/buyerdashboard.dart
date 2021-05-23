@@ -74,7 +74,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
         nearestCollectionPoint = (collectionPoint['name']);
       });
       print((collectionPoint['name']));
-      return (collectionPoint['name']);
+
+      return (nearestCollectionPoint);
     });
   }
 
@@ -214,8 +215,7 @@ class _BuyerDashboardState extends State<BuyerDashboard>
 
   @override
   Widget build(BuildContext context) {
-    getlocation();
-
+    print(nearestCollectionPoint);
     index = 0;
     var height = MediaQuery.of(context).size.height;
     //width of the screen
@@ -413,11 +413,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['rating'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
@@ -1033,11 +1030,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['quantity'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
