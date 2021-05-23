@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ClickandPick/Manager/ManageOrders.dart';
+import 'package:ClickandPick/Manager/Manageusers.dart';
 
 class ManagerDrawer extends StatelessWidget {
   ManagerDrawer({Key key}) : super(key: key);
@@ -104,6 +105,21 @@ class ManagerDrawer extends StatelessWidget {
                     builder: (context) => ManageShops(
                           type: Manager.userData.email,
                         )),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.people),
+            title: Text(
+              'Manage Users',
+              style: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Manageusers()),
               );
             },
           ),

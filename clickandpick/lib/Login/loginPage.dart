@@ -155,6 +155,75 @@ class _LoginPageState extends State<LoginPage> {
   List user = [];
   List seller = [];
   List rider = [];
+  List<String> suspended = [];
+  checksuspended() async {
+    await FirebaseFirestore.instance
+        .collection('user')
+        .where('isSuspended', isEqualTo: "true")
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
+
+        setState(() {
+          suspended.add(doc['email']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
+  }
+
+  checksell() async {
+    await FirebaseFirestore.instance
+        .collection('seller')
+        .where('isSuspended', isEqualTo: "true")
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
+
+        setState(() {
+          suspended.add(doc['email']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
+  }
+
+  checkrider() async {
+    await FirebaseFirestore.instance
+        .collection('rider')
+        .where('isSuspended', isEqualTo: "true")
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
+
+        setState(() {
+          suspended.add(doc['email']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
+  }
 
   void getUser() async {
     QuerySnapshot snap =
@@ -194,8 +263,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    checksuspended();
+    checksell();
+    checkrider();
     // TODO: implement initState
     super.initState();
+
     getSeller();
     getUser();
     getRiders();
@@ -540,6 +613,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(suspended);
     var width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -626,32 +700,45 @@ class _LoginPageState extends State<LoginPage> {
                                 onTap: () async {
                                   FormState fs = _formKey.currentState;
                                   fs.validate();
-                                  try {
-                                    final result = await InternetAddress.lookup(
-                                        'google.com');
-                                    if (result.isNotEmpty &&
-                                        result[0].rawAddress.isNotEmpty) {
-                                      print('connected');
-                                      setState(() {
-                                        login = false;
-                                      });
-                                      logIn(type);
-                                    }
-                                  } on SocketException catch (_) {
-                                    print('not connected');
-                                    setState(() {
-                                      login = false;
-                                    });
+                                  if (suspended.contains(email.text)) {
                                     Fluttertoast.showToast(
-                                      msg:
-                                          "You're not connected to the internet",
+                                      msg: "Your Account is Suspended ",
                                       toastLength: Toast.LENGTH_LONG,
                                       gravity: ToastGravity.BOTTOM,
-                                      timeInSecForIosWeb: 3,
+                                      timeInSecForIosWeb: 5,
                                       backgroundColor: Colors.red[400],
                                       textColor: Colors.white,
                                       fontSize: 15,
                                     );
+                                  } else {
+                                    try {
+                                      final result =
+                                          await InternetAddress.lookup(
+                                              'google.com');
+                                      if (result.isNotEmpty &&
+                                          result[0].rawAddress.isNotEmpty) {
+                                        print('connected');
+                                        setState(() {
+                                          login = false;
+                                        });
+                                        logIn(type);
+                                      }
+                                    } on SocketException catch (_) {
+                                      print('not connected');
+                                      setState(() {
+                                        login = false;
+                                      });
+                                      Fluttertoast.showToast(
+                                        msg:
+                                            "You're not connected to the internet",
+                                        toastLength: Toast.LENGTH_LONG,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 3,
+                                        backgroundColor: Colors.red[400],
+                                        textColor: Colors.white,
+                                        fontSize: 15,
+                                      );
+                                    }
                                   }
                                 },
                                 child: Container(

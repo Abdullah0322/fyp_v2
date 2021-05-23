@@ -89,7 +89,9 @@ class _RegisterSellerState extends State<RegisterSeller> {
             'email': email.text,
             'address': shopaddress.text,
             'shopname': shopname.text,
-            'collection point': _myActivity
+            'collection point': _myActivity,
+            'phone': phone.text,
+            'isSuspended': "false"
           });
         } catch (e) {
           print('Error is: ' + e);

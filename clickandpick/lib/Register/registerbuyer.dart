@@ -94,7 +94,8 @@ class _RegisterState extends State<Register> {
               'username': name.text,
               'email': email.text,
               'phone': phone.text,
-              'address': ''
+              'address': '',
+              'isSuspended': "false"
             });
           } catch (e) {
             print('Error is: ' + e);
