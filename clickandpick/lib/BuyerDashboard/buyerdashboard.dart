@@ -43,11 +43,12 @@ class _BuyerDashboardState extends State<BuyerDashboard>
   var store;
   List<int> distances = [];
   List<GeoPoint> collection = [];
-  List<Map<String, dynamic>> distancesBetween = [];
+
   String nearestCollectionPoint;
   var small;
   var collect;
-  getlocation() async {
+  Future getlocation() async {
+    List<Map<String, dynamic>> distancesBetween = [];
     await FirebaseFirestore.instance
         .collection('manager')
         .get()
@@ -74,8 +75,6 @@ class _BuyerDashboardState extends State<BuyerDashboard>
         nearestCollectionPoint = (collectionPoint['name']);
       });
       print((collectionPoint['name']));
-
-      return (nearestCollectionPoint);
     });
   }
 
@@ -95,6 +94,7 @@ class _BuyerDashboardState extends State<BuyerDashboard>
     }).catchError((e) {
       print(e);
     });
+    getlocation();
   }
 
   _getAddressFromLatLng() async {
@@ -121,7 +121,6 @@ class _BuyerDashboardState extends State<BuyerDashboard>
   int index;
   void initState() {
     _getCurrentLocation();
-
     getlocation();
     super.initState();
   }
@@ -215,12 +214,12 @@ class _BuyerDashboardState extends State<BuyerDashboard>
 
   @override
   Widget build(BuildContext context) {
-    print(nearestCollectionPoint);
     index = 0;
+    print(nearestCollectionPoint);
     var height = MediaQuery.of(context).size.height;
     //width of the screen
     var width = MediaQuery.of(context).size.width;
-    isLoggedIn();
+
     return SafeArea(
       child: WillPopScope(
           onWillPop: () {
@@ -602,11 +601,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['quantity'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
@@ -816,11 +812,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['quantity'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
@@ -1224,11 +1217,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['quantity'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
@@ -1438,11 +1428,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
                                                                     .data
                                                                     .docs[index]
                                                                 ['quantity'],
-                                                            collectionpoint: snapshot
-                                                                    .data
-                                                                    .docs[index]
-                                                                [
-                                                                'collection point'],
+                                                            collectionpoint:
+                                                                nearestCollectionPoint,
                                                           ),
                                                         ),
                                                       ));
