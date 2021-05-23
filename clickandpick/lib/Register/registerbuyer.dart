@@ -45,90 +45,127 @@ class _RegisterState extends State<Register> {
     RequiredValidator(errorText: 'password is required'),
     MinLengthValidator(8, errorText: 'password must be at least 8 digits long'),
   ]);
-  void signup() async {
-    try {
-      // ignore: unused_local_variable
-      UserCredential user = await mauth.createUserWithEmailAndPassword(
-          email: email.text, password: password.text);
-      User users = FirebaseAuth.instance.currentUser;
+  List<String> phonenumbers = [];
+  checkphone() async {
+    await FirebaseFirestore.instance
+        .collection('user')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
 
+        setState(() {
+          phonenumbers.add(doc['phone']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
+  }
+
+  void signup() async {
+    if (phone.text == phonenumbers.toString()) {
+      print("Phone taken");
       setState(() {
-        signUp = true;
+        signUp = false;
       });
-      if (user != null) {
-        try {
-          FirebaseFirestore.instance
-              .collection("user")
-              .doc("${email.text}")
-              .set({
-            'created_at': Timestamp.now(),
-            'username': name.text,
-            'email': email.text,
-            'phone': phone.text,
-            'address': ''
-          });
-        } catch (e) {
-          print('Error is: ' + e);
+    } else {
+      try {
+        // ignore: unused_local_variable
+        UserCredential user = await mauth.createUserWithEmailAndPassword(
+            email: email.text, password: password.text);
+        User users = FirebaseAuth.instance.currentUser;
+
+        setState(() {
+          signUp = true;
+        });
+        if (user != null) {
+          try {
+            FirebaseFirestore.instance
+                .collection("user")
+                .doc("${email.text}")
+                .set({
+              'created_at': Timestamp.now(),
+              'username': name.text,
+              'email': email.text,
+              'phone': phone.text,
+              'address': ''
+            });
+          } catch (e) {
+            print('Error is: ' + e);
+          }
         }
-      }
-      await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(
-                'Registered successfully!',
-                style: TextStyle(color: Colors.black, fontFamily: 'Segoe'),
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text(
-                    "Continue",
-                    style: TextStyle(color: Colors.black, fontFamily: 'Segoe'),
-                  ),
-                  onPressed: () async {
-                    try {
-                      await FirebaseAuth.instance.signOut();
-                    } catch (e) {
-                      print(e);
-                    }
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                        (route) => false);
-                  },
+        await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(
+                  'Registered successfully!',
+                  style: TextStyle(color: Colors.black, fontFamily: 'Segoe'),
                 ),
-              ],
-            );
-          }).then((value) async {
-        try {
-          await FirebaseAuth.instance.signOut();
-        } catch (e) {
-          print(e);
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text(
+                      "Continue",
+                      style:
+                          TextStyle(color: Colors.black, fontFamily: 'Segoe'),
+                    ),
+                    onPressed: () async {
+                      try {
+                        await FirebaseAuth.instance.signOut();
+                      } catch (e) {
+                        print(e);
+                      }
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                          (route) => false);
+                    },
+                  ),
+                ],
+              );
+            }).then((value) async {
+          try {
+            await FirebaseAuth.instance.signOut();
+          } catch (e) {
+            print(e);
+          }
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+              (route) => false);
+        });
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use') {
+          Fluttertoast.showToast(
+            msg: "Email already in use",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 3,
+            backgroundColor: Colors.grey,
+            textColor: Colors.white,
+            fontSize: 15,
+          );
         }
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
-            (route) => false);
-      });
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        Fluttertoast.showToast(
-          msg: "Email already in use",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 3,
-          backgroundColor: Colors.grey,
-          textColor: Colors.white,
-          fontSize: 15,
-        );
+      } catch (e) {
+        print("Error: " + e);
       }
-    } catch (e) {
-      print("Error: " + e);
     }
+  }
+
+  void initState() {
+    checkphone();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(phonenumbers);
     var height = MediaQuery.of(context).size.height;
     //width of the screen
     var width = MediaQuery.of(context).size.width;
@@ -342,24 +379,9 @@ class _RegisterState extends State<Register> {
                       child: GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState.validate()) {
-                            try {
-                              final result =
-                                  await InternetAddress.lookup('google.com');
-                              if (result.isNotEmpty &&
-                                  result[0].rawAddress.isNotEmpty) {
-                                print('connected');
-                                setState(() {
-                                  signUp = false;
-                                });
-                                signup();
-                              }
-                            } on SocketException catch (_) {
-                              print('not connected');
-                              setState(() {
-                                signUp = false;
-                              });
+                            if (phonenumbers.contains(phone.text)) {
                               Fluttertoast.showToast(
-                                msg: "You're not connected to the internet",
+                                msg: "Phone number has been taken",
                                 toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.BOTTOM,
                                 timeInSecForIosWeb: 3,
@@ -367,6 +389,33 @@ class _RegisterState extends State<Register> {
                                 textColor: Colors.white,
                                 fontSize: 15,
                               );
+                            } else {
+                              try {
+                                final result =
+                                    await InternetAddress.lookup('google.com');
+                                if (result.isNotEmpty &&
+                                    result[0].rawAddress.isNotEmpty) {
+                                  print('connected');
+                                  setState(() {
+                                    signUp = false;
+                                  });
+                                  signup();
+                                }
+                              } on SocketException catch (_) {
+                                print('not connected');
+                                setState(() {
+                                  signUp = false;
+                                });
+                                Fluttertoast.showToast(
+                                  msg: "You're not connected to the internet",
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 3,
+                                  backgroundColor: Colors.red[400],
+                                  textColor: Colors.white,
+                                  fontSize: 15,
+                                );
+                              }
                             }
                           }
                         },

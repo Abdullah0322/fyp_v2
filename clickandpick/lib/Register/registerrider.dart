@@ -27,9 +27,33 @@ class _RegisterRiderState extends State<RegisterRider> {
   final register = TextEditingController();
   var signUp;
   void initState() {
+    checkphone();
     super.initState();
     _myActivity = '';
     _myActivityResult = '';
+  }
+
+  List<String> phonenumbers = [];
+  checkphone() async {
+    await FirebaseFirestore.instance
+        .collection('rider')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
+
+        setState(() {
+          phonenumbers.add(doc['phone']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
   }
 
   final requiredValidator =
@@ -133,6 +157,7 @@ class _RegisterRiderState extends State<RegisterRider> {
 
   @override
   Widget build(BuildContext context) {
+    print(phonenumbers);
     var height = MediaQuery.of(context).size.height;
     //width of the screen
     var width = MediaQuery.of(context).size.width;
@@ -420,24 +445,9 @@ class _RegisterRiderState extends State<RegisterRider> {
                       child: GestureDetector(
                         onTap: () async {
                           if (_formKey.currentState.validate()) {
-                            try {
-                              final result =
-                                  await InternetAddress.lookup('google.com');
-                              if (result.isNotEmpty &&
-                                  result[0].rawAddress.isNotEmpty) {
-                                print('connected');
-                                setState(() {
-                                  signUp = false;
-                                });
-                                signup();
-                              }
-                            } on SocketException catch (_) {
-                              print('not connected');
-                              setState(() {
-                                signUp = false;
-                              });
+                            if (phonenumbers.contains(phone.text)) {
                               Fluttertoast.showToast(
-                                msg: "You're not connected to the internet",
+                                msg: "Phone number has been taken",
                                 toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.BOTTOM,
                                 timeInSecForIosWeb: 3,
@@ -445,6 +455,33 @@ class _RegisterRiderState extends State<RegisterRider> {
                                 textColor: Colors.white,
                                 fontSize: 15,
                               );
+                            } else {
+                              try {
+                                final result =
+                                    await InternetAddress.lookup('google.com');
+                                if (result.isNotEmpty &&
+                                    result[0].rawAddress.isNotEmpty) {
+                                  print('connected');
+                                  setState(() {
+                                    signUp = false;
+                                  });
+                                  signup();
+                                }
+                              } on SocketException catch (_) {
+                                print('not connected');
+                                setState(() {
+                                  signUp = false;
+                                });
+                                Fluttertoast.showToast(
+                                  msg: "You're not connected to the internet",
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.BOTTOM,
+                                  timeInSecForIosWeb: 3,
+                                  backgroundColor: Colors.red[400],
+                                  textColor: Colors.white,
+                                  fontSize: 15,
+                                );
+                              }
                             }
                           }
                         },

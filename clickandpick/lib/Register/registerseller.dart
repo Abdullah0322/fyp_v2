@@ -26,11 +26,37 @@ class _RegisterSellerState extends State<RegisterSeller> {
   final name = TextEditingController();
   final shopaddress = TextEditingController();
   final shopname = TextEditingController();
+  final phone = TextEditingController();
 
   void initState() {
+    checkphone();
     super.initState();
     _myActivity = '';
     _myActivityResult = '';
+  }
+
+  List<String> phonenumbers = [];
+
+  checkphone() async {
+    await FirebaseFirestore.instance
+        .collection('seller')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        // distances.add(distance(
+        //   LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        //   LatLng(doc['location'].latitude, doc['location'].longitude),
+        // ).toInt());
+
+        setState(() {
+          phonenumbers.add(doc['phone']);
+          // small = distances
+          //     .reduce((value, element) => value < element ? value : element);
+          // collect = doc['collection point'];
+        });
+        // collection.add(doc["location"]);
+      });
+    });
   }
 
   final requiredValidator =
@@ -305,6 +331,32 @@ class _RegisterSellerState extends State<RegisterSeller> {
                           ),
                         ),
                         child: TextFormField(
+                          controller: phone,
+                          validator: validateMobile,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(left: 10),
+                            hintText: 'Phone Number',
+                            hintStyle: TextStyle(color: headingcolor),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Center(
+                      child: Container(
+                        width: width * 0.8,
+                        decoration: new BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: new Border.all(
+                            color: Colors.white,
+                            width: 1.0,
+                          ),
+                        ),
+                        child: TextFormField(
                           controller: shopname,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(left: 10),
@@ -404,26 +456,9 @@ class _RegisterSellerState extends State<RegisterSeller> {
                                 ),
                                 onPressed: () async {
                                   if (_formKey.currentState.validate()) {
-                                    try {
-                                      final result =
-                                          await InternetAddress.lookup(
-                                              'google.com');
-                                      if (result.isNotEmpty &&
-                                          result[0].rawAddress.isNotEmpty) {
-                                        print('connected');
-                                        setState(() {
-                                          signUp = false;
-                                        });
-                                        signup();
-                                      }
-                                    } on SocketException catch (_) {
-                                      print('not connected');
-                                      setState(() {
-                                        signUp = false;
-                                      });
+                                    if (phonenumbers.contains(phone.text)) {
                                       Fluttertoast.showToast(
-                                        msg:
-                                            "You're not connected to the internet",
+                                        msg: "Phone number has been taken",
                                         toastLength: Toast.LENGTH_LONG,
                                         gravity: ToastGravity.BOTTOM,
                                         timeInSecForIosWeb: 3,
@@ -431,6 +466,35 @@ class _RegisterSellerState extends State<RegisterSeller> {
                                         textColor: Colors.white,
                                         fontSize: 15,
                                       );
+                                    } else {
+                                      try {
+                                        final result =
+                                            await InternetAddress.lookup(
+                                                'google.com');
+                                        if (result.isNotEmpty &&
+                                            result[0].rawAddress.isNotEmpty) {
+                                          print('connected');
+                                          setState(() {
+                                            signUp = false;
+                                          });
+                                          signup();
+                                        }
+                                      } on SocketException catch (_) {
+                                        print('not connected');
+                                        setState(() {
+                                          signUp = false;
+                                        });
+                                        Fluttertoast.showToast(
+                                          msg:
+                                              "You're not connected to the internet",
+                                          toastLength: Toast.LENGTH_LONG,
+                                          gravity: ToastGravity.BOTTOM,
+                                          timeInSecForIosWeb: 3,
+                                          backgroundColor: Colors.red[400],
+                                          textColor: Colors.white,
+                                          fontSize: 15,
+                                        );
+                                      }
                                     }
                                   }
                                 },
