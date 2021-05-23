@@ -1,37 +1,20 @@
-import 'dart:io';
-import 'package:ClickandPick/BuyerDashboard/Search.dart';
-
 import 'package:ClickandPick/BuyerDashboard/Buyer_drawer.dart';
 import 'package:ClickandPick/BuyerDashboard/Category.dart';
 import 'package:ClickandPick/BuyerDashboard/Categoryselect.dart';
 import 'package:ClickandPick/BuyerDashboard/details.dart';
-import 'package:ClickandPick/BuyerDashboard/favourites.dart';
 import 'package:ClickandPick/BuyerDashboard/title_text.dart';
 import 'package:ClickandPick/Cart/cart.dart';
-import 'package:ClickandPick/Login/loginPage.dart';
 import 'package:ClickandPick/SellerDashboard/data.dart';
 import 'package:ClickandPick/settings.dart/setting_page.dart';
-import 'package:ClickandPick/utils/colors.dart';
-import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
-import 'package:carousel_slider/carousel_controller.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-
-import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:android_intent/android_intent.dart';
 import 'package:latlong/latlong.dart';
 
 final List<String> imgList = [
@@ -60,6 +43,8 @@ class _BuyerDashboardState extends State<BuyerDashboard>
   var store;
   List<int> distances = [];
   List<GeoPoint> collection = [];
+  List<Map<String, dynamic>> distancesBetween = [];
+  String nearestCollectionPoint;
   var small;
   var collect;
   getlocation() async {
@@ -68,19 +53,28 @@ class _BuyerDashboardState extends State<BuyerDashboard>
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
-        distances.add(distance(
-          LatLng(_currentPosition.latitude, _currentPosition.longitude),
-          LatLng(doc['location'].latitude, doc['location'].longitude),
-        ).toInt());
-
-        setState(() {
-          small = distances
-              .reduce((value, element) => value < element ? value : element);
-          collect = doc['collection point'];
+        distancesBetween.add({
+          'name': doc['collection point'],
+          'distance': distance(
+            LatLng(_currentPosition.latitude, _currentPosition.longitude),
+            LatLng(doc['location'].latitude, doc['location'].longitude),
+          ).toInt()
         });
-
-        // collection.add(doc["location"]);
       });
+      int smallest = (distancesBetween[0])['distance'];
+      var collectionPoint = distancesBetween[0];
+
+      distancesBetween.forEach((element) {
+        if ((element)['distance'] < smallest) {
+          smallest = (element)['distance'];
+          collectionPoint = element;
+        }
+      });
+      setState(() {
+        nearestCollectionPoint = (collectionPoint['name']);
+      });
+      print((collectionPoint['name']));
+      return (collectionPoint['name']);
     });
   }
 
@@ -221,8 +215,7 @@ class _BuyerDashboardState extends State<BuyerDashboard>
   @override
   Widget build(BuildContext context) {
     getlocation();
-    print(small);
-    print(collect);
+
     index = 0;
     var height = MediaQuery.of(context).size.height;
     //width of the screen
