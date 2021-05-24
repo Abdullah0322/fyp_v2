@@ -242,7 +242,7 @@ class _WalletState extends State<Wallet> {
                                         'price': widget.data.price,
                                         'image': widget.data.image,
                                         'buyeremail': user.email,
-                                        'phone number': g.toString(),
+                                        'phone': g.toString(),
                                         'picked from vendor': false,
                                         'Order Dilevered to Collection Point':
                                             false,
@@ -390,8 +390,7 @@ class _WalletState extends State<Wallet> {
                                                             widget.data.image,
                                                         'buyeremail':
                                                             user.email,
-                                                        'phone number':
-                                                            g.toString(),
+                                                        'phone': g.toString(),
                                                         'picked from vendor':
                                                             false,
                                                         'Order Dilevered to Collection Point':
