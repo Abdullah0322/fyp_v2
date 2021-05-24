@@ -15,23 +15,24 @@ class Data {
   double total;
   double rating;
   String collectionpoint;
+  String phone;
 
-  Data({
-    this.name,
-    this.quantity,
-    this.category,
-    this.image,
-    this.price,
-    this.id,
-    this.description,
-    this.sellername,
-    this.shopaddress,
-    this.selleremail,
-    this.buyeremail,
-    this.total,
-    this.rating,
-    this.collectionpoint,
-  });
+  Data(
+      {this.name,
+      this.quantity,
+      this.category,
+      this.image,
+      this.price,
+      this.id,
+      this.description,
+      this.sellername,
+      this.shopaddress,
+      this.selleremail,
+      this.buyeremail,
+      this.total,
+      this.rating,
+      this.collectionpoint,
+      this.phone});
 }
 
 class Seller {

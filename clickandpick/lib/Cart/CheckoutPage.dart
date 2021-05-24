@@ -1,3 +1,4 @@
+import 'package:ClickandPick/Cart/wallet.dart';
 import 'package:ClickandPick/RiderDashboard/riderContactUs.dart';
 import 'package:ClickandPick/SellerDashboard/data.dart';
 import 'package:ClickandPick/utils/colors.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ClickandPick/BuyerDashboard/title_text.dart';
 import 'package:ClickandPick/BuyerDashboard/light_color.dart';
+
 import 'package:geolocator/geolocator.dart';
 
 class Checkout extends StatefulWidget {
@@ -355,132 +357,36 @@ class _CheckoutState extends State<Checkout> {
                                                             horizontal: 12),
                                                     child: RaisedButton(
                                                       onPressed: () {
-                                                        return showDialog(
-                                                            context: context,
-                                                            builder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                  'Are you sure you want to buy this product',
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontFamily:
-                                                                          'Segoe'),
-                                                                ),
-                                                                actions: <
-                                                                    Widget>[
-                                                                  FlatButton(
-                                                                    child: Text(
-                                                                      "Cancel",
-                                                                      style: TextStyle(
-                                                                          color: Colors
-                                                                              .black,
-                                                                          fontFamily:
-                                                                              'Segoe'),
-                                                                    ),
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.pop(
-                                                                          context);
-                                                                    },
-                                                                  ),
-                                                                  FlatButton(
-                                                                    child: Text(
-                                                                      "Yes",
-                                                                      style: TextStyle(
-                                                                          color: Colors
-                                                                              .black,
-                                                                          fontFamily:
-                                                                              'Segoe'),
-                                                                    ),
-                                                                    onPressed:
-                                                                        () {
-                                                                      User user = FirebaseAuth
-                                                                          .instance
-                                                                          .currentUser;
-                                                                      FirebaseFirestore
-                                                                          .instance
-                                                                          .collection(
-                                                                              'user')
-                                                                          .doc(user
-                                                                              .email)
-                                                                          .collection(
-                                                                              'orders')
-                                                                          .doc()
-                                                                          .set({
-                                                                        'name':
-                                                                            ds['name'],
-                                                                        'selleremail':
-                                                                            ds['selleremail'].toString(),
-                                                                        'id': ds['id']
-                                                                            .toString(),
-                                                                        'quantity':
-                                                                            ds['quantity'].toString()
-                                                                      });
-
-                                                                      FirebaseFirestore
-                                                                          .instance
-                                                                          .collection(
-                                                                              'orders')
-                                                                          .doc()
-                                                                          .set({
-                                                                        'name':
-                                                                            ds['name'],
-                                                                        'selleremail':
-                                                                            ds['selleremail'].toString(),
-                                                                        'id': ds['id']
-                                                                            .toString(),
-                                                                        'quantity':
-                                                                            ds['quantity'].toString(),
-                                                                        'price':
-                                                                            ds['price'],
-                                                                        'total':
-                                                                            ds['total'],
-                                                                        'image':
-                                                                            ds['image'],
-                                                                        'buyeremail':
-                                                                            user.email,
-                                                                        'phone':
-                                                                            g.toString(),
-                                                                        'picked from vendor':
-                                                                            false,
-                                                                        'Order Dilevered to Collection Point':
-                                                                            false,
-                                                                        'Order Recieved to Collection Point':
-                                                                            false,
-                                                                        'Rider':
-                                                                            "",
-                                                                        'shopaddress':
-                                                                            ds['selleraddress'],
-                                                                        'collection point':
-                                                                            ds['collection point']
-                                                                      });
-                                                                      FirebaseFirestore
-                                                                          .instance
-                                                                          .collection(
-                                                                              'user')
-                                                                          .doc(user
-                                                                              .email)
-                                                                          .collection(
-                                                                              'cart')
-                                                                          .doc(ds
-                                                                              .id)
-                                                                          .delete();
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop();
-                                                                      showThankYouBottomSheet(
-                                                                          context);
-                                                                    },
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            });
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) => Wallet(
+                                                                  data: Data(
+                                                                      id: snapshot
+                                                                          .data
+                                                                          .docs[index][
+                                                                              'id']
+                                                                          .toString(),
+                                                                      name: snapshot
+                                                                              .data
+                                                                              .docs[index][
+                                                                          'name'],
+                                                                      price: snapshot
+                                                                          .data
+                                                                          .docs[index]
+                                                                              ['price']
+                                                                          .toString(),
+                                                                      image: snapshot.data.docs[index]['image'],
+                                                                      description: snapshot.data.docs[index]['description'],
+                                                                      shopaddress: snapshot.data.docs[index]['selleraddress'],
+                                                                      selleremail: snapshot.data.docs[index]['selleremail'].toString(),
+                                                                      quantity: snapshot.data.docs[index]['quantity'].toString(),
+                                                                      collectionpoint: snapshot.data.docs[index]['collection point'],
+                                                                      total: snapshot.data.docs[index]['total'])),
+                                                            ));
                                                       },
                                                       child: Text(
-                                                        "Place Order",
+                                                        "Proceed to Payment",
                                                         style: CustomTextStyle
                                                             .textFormFieldMedium
                                                             .copyWith(
