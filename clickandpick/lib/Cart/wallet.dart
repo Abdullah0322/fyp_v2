@@ -1,11 +1,14 @@
 import 'package:ClickandPick/BuyerDashboard/buyerdashboard.dart';
 import 'package:ClickandPick/BuyerDashboard/title_text.dart';
 import 'package:ClickandPick/Cart/initservice.dart';
+import 'package:ClickandPick/Cart/newScreen.dart';
+import 'package:ClickandPick/Cart/notificationPlugin.dart';
 import 'package:ClickandPick/SellerDashboard/data.dart';
 import 'package:ClickandPick/utils/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'dart:convert';
 
@@ -23,6 +26,21 @@ class Wallet extends StatefulWidget {
 class _WalletState extends State<Wallet> {
   final phone = TextEditingController();
   final amount = TextEditingController();
+  List<String> orders = [];
+  getorders() {
+    FirebaseFirestore.instance
+        .collection('orders')
+        .where("Order Recieved to Collection Point", isEqualTo: false)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        setState(() {
+          orders.add(doc.id);
+        });
+      });
+    });
+  }
+
   getUsers() {
     User user = FirebaseAuth.instance.currentUser;
     try {
@@ -35,10 +53,50 @@ class _WalletState extends State<Wallet> {
     }
   }
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  var initializationSettings;
   void initState() {
+    notificationPlugin
+        .setListenerforlowerVersions(onNotificationinLowerVersions);
+    notificationPlugin.setOnNotificationClick(onNotificationClick);
+
+    getorders();
     getphone();
     getUsers();
+
     super.initState();
+    final AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('comment');
+
+    var initializationSettingsAndroid2 = initializationSettingsAndroid;
+    var initializationSettingsIOs = IOSInitializationSettings();
+    var initSetttings = InitializationSettings(
+        android: initializationSettingsAndroid2,
+        iOS: initializationSettingsIOs);
+    flutterLocalNotificationsPlugin.initialize(initSetttings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return NewScreen(payload: payload);
+    }));
+  }
+
+  showNotification(title, description) {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+            'your channel id', 'your channel name', 'your channel description',
+            importance: Importance.max,
+            priority: Priority.high,
+            showWhen: false);
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    flutterLocalNotificationsPlugin.show(
+        0, title, description, platformChannelSpecifics,
+        payload: 'item x');
   }
 
   getphone() async {
@@ -71,6 +129,8 @@ class _WalletState extends State<Wallet> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   @override
   Widget build(BuildContext context) {
+    print(orders);
+    orders.length >= 5 ? print("Wait 10 mins") : print("Order place");
     return Scaffold(
         key: _scaffoldKey,
         backgroundColor: containercolor,
@@ -262,6 +322,9 @@ class _WalletState extends State<Wallet> {
                                           .collection('cart')
                                           .doc(widget.data.id)
                                           .delete();
+                                      showNotification(
+                                          " Your Order " + widget.data.name,
+                                          "You will Receive a Notification Once the Order is Ready");
                                     },
                                     child: Text(
                                       "Pay Now",
@@ -413,6 +476,10 @@ class _WalletState extends State<Wallet> {
                                                           .collection('cart')
                                                           .doc(widget.data.id)
                                                           .delete();
+                                                      showNotification(
+                                                          " Your Order " +
+                                                              widget.data.name,
+                                                          "You will Receive a Notification Once the Order is Ready");
                                                     } else {}
                                                   });
                                                 },
@@ -431,7 +498,7 @@ class _WalletState extends State<Wallet> {
                                                         BorderRadius.all(
                                                             Radius.circular(
                                                                 24))),
-                                              )
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -529,4 +596,7 @@ class _WalletState extends State<Wallet> {
         backgroundColor: Colors.white,
         elevation: 2);
   }
+
+  onNotificationinLowerVersions(ReceivedNotifications receivedNotifications) {}
+  onNotificationClick(String payload) {}
 }

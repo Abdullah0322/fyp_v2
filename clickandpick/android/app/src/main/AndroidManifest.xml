@@ -18,6 +18,8 @@ android:name="android.permission.ACCESS_COARSE_LOCATION" />
         android:label="ClickandPick"
         android:icon="@mipmap/ic_launcher">
         <activity
+         android:showWhenLocked="true"
+         android:turnScreenOn="true"
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
