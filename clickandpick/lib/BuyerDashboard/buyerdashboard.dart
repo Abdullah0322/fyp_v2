@@ -214,6 +214,7 @@ class _BuyerDashboardState extends State<BuyerDashboard>
 
   @override
   Widget build(BuildContext context) {
+    getlocation();
     index = 0;
     print(nearestCollectionPoint);
     var height = MediaQuery.of(context).size.height;
