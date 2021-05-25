@@ -51,6 +51,27 @@ class _WalletState extends State<Wallet> {
     });
   }
 
+  checkReview() async {
+    await FirebaseFirestore.instance
+        .collection('Reviews')
+        .doc(widget.data.id + user.email)
+        .get()
+        .then((value) async {
+      value.data();
+      if (value.data() == null) {
+        await FirebaseFirestore.instance
+            .collection('Reviews')
+            .doc(widget.data.id + user.email)
+            .set({
+          'pid': widget.data.id,
+          'uid': user.email,
+          'rating': 0,
+          'msg': "",
+        });
+      }
+    });
+  }
+
   var g;
 
   User user = FirebaseAuth.instance.currentUser;
@@ -231,6 +252,7 @@ class _WalletState extends State<Wallet> {
                                         'quantity': widget.data.quantity,
                                         'image': widget.data.image
                                       });
+                                      checkReview();
                                       FirebaseFirestore.instance
                                           .collection('orders')
                                           .doc()

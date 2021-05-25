@@ -1,5 +1,7 @@
 import 'package:ClickandPick/BuyerDashboard/Buyer_Drawer.dart';
+import 'package:ClickandPick/BuyerDashboard/productRating.dart';
 import 'package:ClickandPick/BuyerDashboard/title_text.dart';
+import 'package:ClickandPick/SellerDashboard/data.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,6 +19,23 @@ class Myorders extends StatefulWidget {
 
 class _MyordersState extends State<Myorders> {
   User user = FirebaseAuth.instance.currentUser;
+  double ar;
+  var snap1;
+  getReview(pid) async {
+    try {
+      snap1 = await FirebaseFirestore.instance
+          .collection('Reviews')
+          .doc(pid + user.email)
+          .snapshots()
+          .listen((value) {
+        setState(() {
+          ar = snap1['rating'];
+        });
+        print(ar);
+      });
+    } catch (e) {}
+  }
+
   getOrders() {
     try {
       return FirebaseFirestore.instance
@@ -44,12 +63,15 @@ class _MyordersState extends State<Myorders> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-
+    print(ar);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFBB03B2),
         title: Text("Orders"),
       ),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        print(ar);
+      }),
       drawer: BuyerDrawer(),
       body: StreamBuilder(
         stream: getOrders(),
@@ -64,36 +86,46 @@ class _MyordersState extends State<Myorders> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () {
-                            return showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: Text('Rate the Product'),
-                                content: SmoothStarRating(
-                                  allowHalfRating: false,
-                                  size: 30.0,
-                                  color: Colors.yellow,
-                                  //rating: widget.data.rating,
-                                  // onRated: (double value) async {
-                                  //debugPrint(
-                                  //'Image no. $index was rated $value stars!!!');
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: Text('Yes'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      //signOut();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text('No'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProductRating(data: Data(id: ds['id'])),
+                                ));
+
+                            // getReview(ds['id']);
+                            // print(ds['id']);
+                            // return showDialog(
+                            //   context: context,
+                            //   builder: (_) => AlertDialog(
+                            //     title: Text('Rate the Product'),
+                            //     content: SmoothStarRating(
+                            //         allowHalfRating: false,
+                            //         size: 30.0,
+                            //         color: Colors.yellow,
+                            //         rating: ds['id'],
+                            //         onRated: (double value) async {
+                            //           debugPrint(
+                            //               'Image no. $index was rated $value stars!!!');
+                            //           //rating: widget.data.rating,
+                            //         }),
+                            //     actions: [
+                            //       TextButton(
+                            //         child: Text('Yes'),
+                            //         onPressed: () {
+                            //           Navigator.pop(context);
+                            //           //signOut();
+                            //         },
+                            //       ),
+                            //       TextButton(
+                            //         child: Text('No'),
+                            //         onPressed: () {
+                            //           Navigator.pop(context);
+                            //         },
+                            //       ),
+                            //     ],
+                            //   ),
+                            // );
                           },
                           child: Ink(
                             height: 80,
