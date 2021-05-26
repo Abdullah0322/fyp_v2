@@ -160,29 +160,31 @@ class _ProductRatingState extends State<ProductRating> {
                         .collection('Reviews')
                         .doc(widget.data.id + user.email)
                         .update({
-                      'rating': valueR,
+                      'rating': valueR.toDouble(),
                     });
-                    AlertDialog(
-                        title: Text(
-                          'Your Rating has been submitted',
-                          style: TextStyle(
-                              color: Colors.black, fontFamily: 'Segoe'),
-                        ),
-                        actions: <Widget>[
-                          FlatButton(
-                            child: Text(
-                              "OK",
+                    return showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(
+                              'Your Rating has been submitted',
                               style: TextStyle(
                                   color: Colors.black, fontFamily: 'Segoe'),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Myorders()));
-                            },
-                          ),
-                        ]);
+                            actions: <Widget>[
+                              FlatButton(
+                                  child: Text(
+                                    "OK",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Segoe'),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  }),
+                            ],
+                          );
+                        });
                   },
                 )
               ],

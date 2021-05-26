@@ -33,6 +33,8 @@ class _DetailsState extends State<Details> {
   @override
   void initState() {
     super.initState();
+    getrate();
+
     User user = FirebaseAuth.instance.currentUser;
     setState(() {
       email = user.email;
@@ -100,6 +102,29 @@ class _DetailsState extends State<Details> {
     }
   }
 
+  List<double> avgrating = [];
+
+//**************** */
+  getrate() {
+    FirebaseFirestore.instance
+        .collection('Reviews')
+        .where('pid', isEqualTo: widget.data.id)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        setState(() {
+          avgrating.add(doc['rating']);
+        });
+      });
+      setState(() {
+        avgrating.forEach((e) => sum += e);
+      });
+    });
+  }
+
+  var sum = 0.0;
+
+  //************************************************************************************************** */
   void _toggleFavorite() {
     setState(() {
       if (_isFavorited) {
@@ -150,6 +175,9 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
+    print(avgrating);
+    //getrate();
+    print(sum);
     getpri();
     setquant();
     print(_isFavorited);
@@ -412,25 +440,11 @@ class _DetailsState extends State<Details> {
                             Align(
                               alignment: Alignment.bottomLeft,
                               child: SmoothStarRating(
-                                allowHalfRating: false,
+                                allowHalfRating: true,
                                 size: 30.0,
                                 color: Colors.yellow,
-                                rating: widget.data.rating,
-                                onRated: (double value) async {
-                                  debugPrint(
-                                      'Image no. $index was rated $value stars!!!');
-
-                                  User user = FirebaseAuth.instance.currentUser;
-
-                                  await FirebaseFirestore.instance
-                                      .collection('products')
-                                      .doc('category')
-                                      .collection(widget.type)
-                                      .doc(widget.data.id.toString())
-                                      .update({
-                                    'rating': value,
-                                  });
-                                },
+                                rating: sum / avgrating.length,
+                                isReadOnly: true,
                                 borderColor: Colors.grey,
                                 //allowHalfRating: true,
                               ),
