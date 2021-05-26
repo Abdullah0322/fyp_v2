@@ -1,4 +1,5 @@
 import 'package:ClickandPick/BuyerDashboard/Buyer_Drawer.dart';
+import 'package:ClickandPick/BuyerDashboard/myorders.dart';
 import 'package:ClickandPick/SellerDashboard/data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +21,10 @@ class _ProductRatingState extends State<ProductRating> {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   var ar;
-  int arInt;
+  double arInt;
+  var msgV;
+  String msgS;
+
   getProducts() async {
     User user = await FirebaseAuth.instance.currentUser;
     DocumentSnapshot snap = await FirebaseFirestore.instance
@@ -29,15 +33,41 @@ class _ProductRatingState extends State<ProductRating> {
         .get();
     setState(() {
       ar = snap['rating'];
-      ar = arInt;
+      arInt = ar;
+      if (arInt == null) {
+        arInt = 0;
+        return arInt;
+      } else {
+        return arInt;
+      }
     });
   }
 
+  getMsg() async {
+    User user = await FirebaseAuth.instance.currentUser;
+    DocumentSnapshot snap = await FirebaseFirestore.instance
+        .collection('Reviews')
+        .doc(widget.data.id + user.email)
+        .get();
+    setState(() {
+      msgV = snap['msg'];
+      msgS = msgV;
+      if (msgS == null) {
+        msgS = ' ';
+        return msgS;
+      } else {
+        return msgS;
+      }
+    });
+  }
+
+  double valueR;
   @override
   User user = FirebaseAuth.instance.currentUser;
   Widget build(BuildContext context) {
     getProducts();
-    //print(arInt.toDouble());
+    getMsg();
+    //print(arInt);
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(
@@ -72,15 +102,23 @@ class _ProductRatingState extends State<ProductRating> {
                       allowHalfRating: false,
                       size: 30.0,
                       color: Colors.yellow,
-                      //rating: //arInt.toDouble(),
+                      //rating: arInt,
                       onRated: (double value) async {
                         debugPrint('Image no. was rated $value stars!!!');
+                        valueR = value;
                       }),
                 ),
               ],
             ),
             Column(
               children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'You have rated this product as $arInt stars',
+                    style: TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
@@ -91,19 +129,61 @@ class _ProductRatingState extends State<ProductRating> {
                         fontSize: 18.0),
                   ),
                 ),
-                TextField(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(width: 10),
-                        ),
-                        hintText: 'Write your Review')),
+                Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: TextField(
+                      controller: msg,
+                      decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: msgS,
+                          hintStyle: TextStyle(fontSize: 12.0)),
+                    )),
                 ElevatedButton(
                   child: Text('Done.'),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.purple[400], // background
                     onPrimary: Colors.white, // foreground
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    User user = FirebaseAuth.instance.currentUser;
+                    FirebaseFirestore.instance
+                        .collection('Reviews')
+                        .doc(widget.data.id + user.email)
+                        .update({
+                      'msg': msg.text,
+                    });
+                    FirebaseFirestore.instance
+                        .collection('Reviews')
+                        .doc(widget.data.id + user.email)
+                        .update({
+                      'rating': valueR,
+                    });
+                    AlertDialog(
+                        title: Text(
+                          'Your Rating has been submitted',
+                          style: TextStyle(
+                              color: Colors.black, fontFamily: 'Segoe'),
+                        ),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text(
+                              "OK",
+                              style: TextStyle(
+                                  color: Colors.black, fontFamily: 'Segoe'),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Myorders()));
+                            },
+                          ),
+                        ]);
+                  },
                 )
               ],
             ),
